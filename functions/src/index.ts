@@ -30,7 +30,7 @@ app.get("/permissions", async (request: any, response: any) => {
 });
 
 //add user
-attendanceApp.post("/add", async (request: any, response: any) => {
+app.post("/add", async (request: any, response: any) => {
     try {
         const user = get(request, ["body"], null);
         if(!user) throw Error("User not Added as body");
