@@ -71,7 +71,3 @@ export const parseRoster = (val: any) => {
     });
     return res;
 };
-
-export const userParseString = (user: any) => {
-    return `Email: ${user.email}\nRole: ${user.re_role}\nCenter: ${user.re_center}`;
-};

@@ -9,3 +9,9 @@ node_modules/
 
 resources/
 lib/
+
+.runtimeconfig.json
+
+.DS_STORE
+
+.firebasesrc

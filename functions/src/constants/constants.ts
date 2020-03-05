@@ -29,12 +29,13 @@ export interface ReConfig {
    re_shift: string;
    shift_day: string;
    shift_time: string;
+   endpoint: string;
 }
 
 export const permsAsArray = (perms: ReConfig) => {
   const shift_day = perms.re_shift.split(", ")[0] || null;
   const shift_time = perms.re_shift.split(", ")[1] || null;
-  return [perms.re_center, perms.re_class, "Shifts", shift_day, shift_time];
+  return [perms.re_center, perms.re_class, perms.endpoint, "Shifts", shift_day, shift_time];
 }
 
 export const dbGet = (db: database.Database, path: string[], perms?: ReConfig): Promise<any> => {
@@ -59,8 +60,11 @@ export const dbPut = (db: database.Database, path: string[], val: any, perms?: R
     return db.ref(queryString).set(val);
 };
   
-export const getPermsAndToken = (request: any): any => {
-    const perms: ReConfig = get(request, ["headers", "perms"], {});
+export const getPermsAndToken = (request: any, endpoint): any => {
+    const perms: ReConfig = get(request, ["headers", "perms"], null);
+    if(perms) {
+      perms.endpoint = endpoint;
+    }
     const token = get(request, ["headers", "authorization"], "");
     return { perms, token };
 }
@@ -180,4 +184,8 @@ const encodedMail = Buffer.from(str)
     .replace(/\//g, "_");
   return encodedMail;
 }
+
+export const userParseString = (user: any) => {
+  return `Email: ${user.email}\nRole: ${user.re_role}\nCenter: ${user.re_center}`;
+};
   
