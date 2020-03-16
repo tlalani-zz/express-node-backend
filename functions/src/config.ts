@@ -6,6 +6,6 @@ const admin = fbApp.initializeApp({
   credential: fbApp.credential.cert(serviceAccount),
   databaseURL: functions.config().config.databaseurl
 });
-
+export const calendarId = functions.config().config.calendarId;
 export const auth = admin.auth();
 export const db = admin.database();

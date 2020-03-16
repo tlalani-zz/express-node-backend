@@ -8,13 +8,14 @@ import { db } from "./config";
 import { HttpEndpoints, ENDPOINTS } from "./constants/http-constants";
 import { auth } from "./config";
 import { dbGet, handleError, base64encode, dbPut, sendEmail, userParseString } from "./constants/constants";
+import { calendarRouter } from "./calendar";
 
 const app: express.Application = express();
 
 app.use(cors());
 app.use(attendanceApp);
 app.use("/inventory", inventoryApp);
-
+app.use("/calendar", calendarRouter);
 
 //get permissions
 app.get("/permissions", async (request: any, response: any) => {
@@ -30,7 +31,7 @@ app.get("/permissions", async (request: any, response: any) => {
 });
 
 //add user
-app.post("/add", async (request: any, response: any) => {
+app.post("/user/add", async (request: any, response: any) => {
     try {
         const user = get(request, ["body"], null);
         if(!user) throw Error("User not Added as body");

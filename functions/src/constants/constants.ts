@@ -4,6 +4,7 @@ import { get } from "lodash";
 import * as fs from "fs";
 import { GoogleApis } from "googleapis";
 import * as readLine from "readline";
+import { calendarId } from '../config';
 
 const google = new GoogleApis();
 const TOKEN = "../../resources/token.json";/* get(functions.config(), ["config", "token"], "");*/
@@ -12,7 +13,8 @@ const SCOPES = [
   "https://mail.google.com/",
   "https://www.googleapis.com/auth/gmail.modify",
   "https://www.googleapis.com/auth/gmail.compose",
-  "https://www.googleapis.com/auth/gmail.send"
+  "https://www.googleapis.com/auth/gmail.send",
+  "https://www.googleapis.com/auth/calendar.events"
 ];
 
 export const UNAUTHORIZED = "Authorization for this resource failed.";
@@ -103,10 +105,33 @@ export const sendEmail = (toEmail: string, subject: string, emailMessage: string
 fs.readFile("../../credentials.json", (err, content: Buffer) => {
   if (err) throw err;
   // Authorize a client with credentials, then call the Gmail API.
-  authorize(JSON.parse(content.toString()), toEmail, subject, emailMessage);
+  authorize(JSON.parse(content.toString()), (oAuth2Client) => {
+    sendMessage(oAuth2Client, toEmail, subject, emailMessage);
+  });
 });
 
-const authorize = (credentials: any, toEmail: string, subject:string,  message: string) => {
+export const eventCall = (event) => {
+  fs.readFile("../../credentials.json", (err, content: Buffer) => {
+    if(err) throw err;
+    authorize(JSON.parse(content.toString()), (oAuth2Client) => {
+      postEvent(oAuth2Client, event);
+    });
+  })
+}
+
+export const postEvent = (auth: any, event: any) => {
+  const calendar = google.calendar({version: "v3", auth });
+  calendar.events.insert({
+    auth: auth,
+    calendarId: calendarId,
+    requestBody: event
+  }, (err, _) => {
+    if(err) throw err;
+    else console.log("GOT IT");
+  })
+}
+
+const authorize = (credentials: any, callback) => {
   const { client_secret, client_id, redirect_uris } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
@@ -116,7 +141,7 @@ const authorize = (credentials: any, toEmail: string, subject:string,  message: 
   fs.readFile(TOKEN, (err, token) => {
     if (err) {getNewToken(oAuth2Client); return;}
     oAuth2Client.setCredentials(JSON.parse(token.toString()));
-    sendMessage(oAuth2Client, toEmail, subject, message);
+    callback(oAuth2Client);
   });
 }
 
